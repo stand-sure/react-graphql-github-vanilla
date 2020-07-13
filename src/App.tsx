@@ -1,16 +1,83 @@
-import React from 'react';
-import './App.css';
+import React, {
+    useRef,
+    FormEvent,
+    useEffect,
+    useCallback,
+} from "react";
+import "./App.css";
+import { Organization } from "./Organization";
+import { getDataFromGithub } from "./getOrganizationDataFromGithub";
+import { useAppState } from "./useAppState";
 
 const TITLE = "React GraphQL Github Client";
 
+type Maybe<T> = T | null | undefined;
+
 const App = function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        {TITLE}
-      </header>
-    </div>
-  );
-}
+    const {
+        organization,
+        setOrganization,
+        errors,
+        setErrors,
+        orgQueryParams,
+        setOrgQueryParams,
+    } = useAppState();
+
+    const url = useRef<HTMLInputElement>(null);
+
+    const fetchDataFromGithub = useCallback(
+        () =>
+            getDataFromGithub({ ...orgQueryParams }).then((res) => {
+                setOrganization({ ...res.data.data.organization });
+                setErrors(res.data.errors);
+            }),
+        [orgQueryParams, setOrganization, setErrors]
+    );
+
+    useEffect(() => {
+        fetchDataFromGithub();
+
+        return () => {
+            // TODO - is there anything to clean up?
+        };
+    }, [fetchDataFromGithub]);
+
+    const onSubmit = (ev: FormEvent) => {
+        const newPath = url.current?.value ?? "";
+        const [newName, newRepo] = newPath.split("/");
+
+        if (!newName || !newRepo) {
+            return;
+        }
+
+        setOrgQueryParams({ organizationName: newName, repo: newRepo });
+
+        ev.preventDefault();
+    };
+
+    return (
+        <div>
+            <header style={{ textAlign: "center", backgroundColor: "cyan" }}>
+                {TITLE}
+            </header>
+            <form onSubmit={onSubmit}>
+                <label htmlFor="url">
+                    Show open issues for https://github.com/
+                </label>
+                <input
+                    id="url"
+                    type="text"
+                    ref={url}
+                    style={{ width: "300px" }}
+                    placeholder="user/repo"
+                    defaultValue={`${orgQueryParams.organizationName}/${orgQueryParams.repo}`}
+                />
+                <button type="submit">Search</button>
+            </form>
+            <hr />
+            <Organization organization={organization} errors={errors} />
+        </div>
+    );
+};
 
 export default App;
