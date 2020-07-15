@@ -1,6 +1,8 @@
-import React, { useRef, FormEvent, useEffect } from "react";
+import React, { useRef, FormEvent, useEffect, useState } from "react";
 import axios from "axios";
 import "./App.css";
+
+type Maybe<T> = T | null | undefined;
 
 const TITLE = "React GraphQL Github Client";
 
@@ -20,32 +22,45 @@ const GET_ORGANIZATION = `
 }
 `;
 
+const Organization = ({ organization }: { organization: Maybe<{ name: string, url: string}> }) => (
+    <div>Organization: {organization?.name}</div>
+);
+
+const Errors = ({ errors }: { errors: Maybe<{}> }) => (
+    <div>Errors: {JSON.stringify(errors)}</div>
+);
+
 const App = function App() {
-    const defaultPath = "the-road-to-learn-react/the-road-to-learn-react";
-    // const [path, setPath] = useState(
-    //     "the-road-to-learn-react/the-road-to-learn-react"
-    // );
+    const [path, setPath] = useState(
+        "the-road-to-learn-react/the-road-to-learn-react"
+    );
+
+    const [organization, setOrganization] = useState(null);
+    const [errors, setErrors] = useState(null);
 
     const url = useRef(null);
 
-    const onSubmit = (ev: FormEvent) => {
-        // const path = ((url.current as any) as HTMLInputElement).value;
-        // console.log(path);
+    const fetchDataFromGithub = () => {
         axiosGithubGraphQL.post("", { query: GET_ORGANIZATION }).then((res) => {
             console.log(res);
+
+            setOrganization(res.data.data.organization);
+            setErrors(res.data.errors);
         });
+    };
+
+    const onSubmit = (ev: FormEvent) => {
+        const newPath = ((url.current as any) as HTMLInputElement).value;
+        setPath(newPath);
+
+        fetchDataFromGithub();
 
         ev.preventDefault();
     };
 
-    useEffect(
-        () => {
-            // fetch data
-        },
-        [
-            /*dependencies TBD*/
-        ]
-    );
+    useEffect(() => {
+        fetchDataFromGithub();
+    }, [path]);
 
     return (
         <div>
@@ -62,12 +77,13 @@ const App = function App() {
                     ref={url}
                     style={{ width: "300px" }}
                     placeholder="user/repo"
-                    defaultValue={defaultPath}
+                    defaultValue={path}
                 />
                 <button type="submit">Search</button>
             </form>
             <hr />
-            <div>TODO results</div>
+            <Organization organization={organization} />
+            <Errors errors={errors} />
         </div>
     );
 };
