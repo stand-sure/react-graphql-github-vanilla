@@ -1,50 +1,65 @@
-import React, { useRef, FormEvent, useEffect, useState } from "react";
-import axios from "axios";
+import React, {
+    useRef,
+    FormEvent,
+    useEffect,
+    useCallback,
+} from "react";
 import "./App.css";
 import { Organization } from "./Organization";
+import { getDataFromGithub } from "./organizationQuery";
+import { useAppState } from "./useAppState";
 
 type Maybe<T> = T | null | undefined;
 
 const TITLE = "React GraphQL Github Client";
 
-const axiosGithubGraphQL = axios.create({
-    baseURL: "https://api.github.com/graphql",
-    headers: {
-        Authorization: `bearer ${process.env.REACT_APP_GITHUB_PERSONAL_ACCESS_TOKEN}`,
-    },
-});
-
-const GET_ORGANIZATION = `
-{
-  organization(login: "the-road-to-learn-react"){
-    name
-    url
-  }
-}
-`;
-
 const App = function App() {
-    const [path, setPath] = useState(
-        "the-road-to-learn-react/the-road-to-learn-react"
-    );
+    // const [path, setPath] = useState(DEFAULT_PATH);
+    // const [organization, setOrganization] = useState({
+    //     name: null,
+    //     url: null,
+    // });
+    // const [organizationName, setOrganizationName] = useState(
+    //     INITIAL_ORGANIZATION
+    // );
+    // const [errors, setErrors] = useState(null);
+    // const [repo, setRepo] = useState(INITIAL_REPO);
 
-    const [organization, setOrganization] = useState(null);
-    const [errors, setErrors] = useState(null);
+    const {
+        path,
+        setPath,
+        organization,
+        setOrganization,
+        organizationName,
+        setOrganizationName,
+        errors,
+        setErrors,
+        repo,
+        setRepo,
+    } = useAppState();
 
     const url = useRef(null);
 
-    const fetchDataFromGithub = () => {
-        axiosGithubGraphQL.post("", { query: GET_ORGANIZATION }).then((res) => {
-            console.log(res);
-
-            setOrganization(res.data.data.organization);
-            setErrors(res.data.errors);
-        });
-    };
+    const fetchDataFromGithub = useCallback(
+        () =>
+            getDataFromGithub({ organizationName, repo }).then((res) => {
+                setOrganization({ ...res.data.data.organization });
+                setErrors(res.data.errors);
+            }),
+        [organizationName, repo, setOrganization, setErrors]
+    );
 
     const onSubmit = (ev: FormEvent) => {
         const newPath = ((url.current as any) as HTMLInputElement).value;
+        const [newName, newRepo] = newPath.split("/");
+
+        if (!newName || !newRepo) {
+            return;
+        }
+
         setPath(newPath);
+        setOrganizationName(newName);
+        setRepo(newRepo);
 
         fetchDataFromGithub();
 
@@ -53,7 +68,7 @@ const App = function App() {
 
     useEffect(() => {
         fetchDataFromGithub();
-    }, [path]);
+    }, [fetchDataFromGithub, path]);
 
     return (
         <div>
