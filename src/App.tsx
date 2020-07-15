@@ -1,6 +1,7 @@
 import React, { useRef, FormEvent, useEffect, useState } from "react";
 import axios from "axios";
 import "./App.css";
+import { Organization } from "./Organization";
 
 type Maybe<T> = T | null | undefined;
 
@@ -21,14 +22,6 @@ const GET_ORGANIZATION = `
   }
 }
 `;
-
-const Organization = ({ organization }: { organization: Maybe<{ name: string, url: string}> }) => (
-    <div>Organization: {organization?.name}</div>
-);
-
-const Errors = ({ errors }: { errors: Maybe<{}> }) => (
-    <div>Errors: {JSON.stringify(errors)}</div>
-);
 
 const App = function App() {
     const [path, setPath] = useState(
@@ -82,8 +75,7 @@ const App = function App() {
                 <button type="submit">Search</button>
             </form>
             <hr />
-            <Organization organization={organization} />
-            <Errors errors={errors} />
+            <Organization organization={organization} errors={errors} />
         </div>
     );
 };
