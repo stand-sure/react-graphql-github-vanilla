@@ -28,7 +28,7 @@ const App = function App() {
             getDataFromGithub({ ...orgQueryParams }).then((res) => {
                 setOrganization({ ...res.data.data.organization });
                 setErrors(res.data.errors);
-                setRepository(res.data.data.organization.repository);
+                setRepository(res.data.data.organization?.repository);
             }),
         [orgQueryParams, setOrganization, setErrors, setRepository]
     );
