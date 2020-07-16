@@ -5,7 +5,7 @@ type ErrorsProps = { errors: Maybe<Array<{ message: string }>> };
 
 const Errors = ({ errors }: ErrorsProps) => (
     <div>
-        <strong>Something went wrong</strong>
+        <strong>Something went wrong: </strong>
         {(errors || []).map((error) => error.message).join(" ")}
     </div>
 );

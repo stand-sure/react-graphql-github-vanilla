@@ -10,18 +10,12 @@ const axiosGithubGraphQL = axios.create({
     },
 });
 
-const issuesQuery = ({
-    organization,
-    repo,
-}: {
-    organization: string;
-    repo: string;
-}) => `
-{
-  organization(login: "${organization}"){
+const issuesQuery = `
+ query ($organization: String!, $repository: String!){
+  organization(login: $organization){
     name
     url
-    repository(name: "${repo}"){
+    repository(name: $repository){
         name
         url
         issues(last: 5){
@@ -55,10 +49,8 @@ const getDataFromGithub = function getData({
     }
 
     return axiosGithubGraphQL.post("", {
-        query: issuesQuery({
-            organization: organizationName,
-            repo,
-        }),
+        query: issuesQuery,
+        variables: { organization: organizationName, repository: repo },
     });
 };
 
