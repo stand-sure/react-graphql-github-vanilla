@@ -1,9 +1,11 @@
 import React, { useRef, FormEvent, useEffect, useCallback } from "react";
-import "./App.css";
 import { Organization } from "../Organization";
 import { Repository } from "../Repository";
 import { getDataFromGithub } from "../getOrganizationDataFromGithub";
 import { useAppState } from "../useAppState";
+
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./App.css";
 
 const TITLE = "React GraphQL Github Client";
 
@@ -55,27 +57,32 @@ const App = function App() {
     };
 
     return (
-        <div>
-            <header style={{ textAlign: "center", backgroundColor: "cyan" }}>
+        <div className="p-1">
+            <header
+                style={{ textAlign: "center", backgroundColor: "cyan" }}
+                className="p-1 text-white bg-info"
+            >
                 {TITLE}
             </header>
-            <form onSubmit={onSubmit}>
+            <form onSubmit={onSubmit} className="form-inline mt-2 mx-3">
                 <label htmlFor="url">
                     Show open issues for https://github.com/
                 </label>
                 <input
                     id="url"
                     type="text"
+                    className="form-control mr-2 w-50"
                     ref={url}
-                    style={{ width: "300px" }}
                     placeholder="user/repo"
                     defaultValue={`${orgQueryParams.organizationName}/${orgQueryParams.repo}`}
                 />
-                <button type="submit">Search</button>
+                <button type="submit" className="btn btn-primary">Search</button>
             </form>
             <hr />
-            <Organization organization={organization} errors={errors} />
-            <Repository repository={repository} />
+            <p className="mx-3">
+                <Organization organization={organization} errors={errors} />
+                <Repository repository={repository} />
+            </p>
         </div>
     );
 };
