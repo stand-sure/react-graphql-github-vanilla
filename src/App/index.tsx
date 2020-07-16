@@ -1,13 +1,9 @@
-import React, {
-    useRef,
-    FormEvent,
-    useEffect,
-    useCallback,
-} from "react";
+import React, { useRef, FormEvent, useEffect, useCallback } from "react";
 import "./App.css";
-import { Organization } from "./Organization";
-import { getDataFromGithub } from "./getOrganizationDataFromGithub";
-import { useAppState } from "./useAppState";
+import { Organization } from "../Organization";
+import { Repository } from "../Repository";
+import { getDataFromGithub } from "../getOrganizationDataFromGithub";
+import { useAppState } from "../useAppState";
 
 const TITLE = "React GraphQL Github Client";
 
@@ -21,6 +17,8 @@ const App = function App() {
         setErrors,
         orgQueryParams,
         setOrgQueryParams,
+        repository,
+        setRepository,
     } = useAppState();
 
     const url = useRef<HTMLInputElement>(null);
@@ -30,8 +28,9 @@ const App = function App() {
             getDataFromGithub({ ...orgQueryParams }).then((res) => {
                 setOrganization({ ...res.data.data.organization });
                 setErrors(res.data.errors);
+                setRepository(res.data.data.organization.repository);
             }),
-        [orgQueryParams, setOrganization, setErrors]
+        [orgQueryParams, setOrganization, setErrors, setRepository]
     );
 
     useEffect(() => {
@@ -76,6 +75,7 @@ const App = function App() {
             </form>
             <hr />
             <Organization organization={organization} errors={errors} />
+            <Repository repository={repository} />
         </div>
     );
 };
