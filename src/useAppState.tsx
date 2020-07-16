@@ -1,27 +1,30 @@
 import { useState } from "react";
-import { DEFAULT_PATH, INITIAL_ORGANIZATION, INITIAL_REPO } from "./organizationQuery";
-export const useAppState = function useAppState() {
-    const [path, setPath] = useState(DEFAULT_PATH);
+import { INITIAL_ORGANIZATION, INITIAL_REPO } from "./getOrganizationDataFromGithub";
+
+/**
+ * sets up state hooks for org query and the response (either errors or GitHub organization fields (as set up in the query))
+ */
+const useAppState = function useAppState() {
     const [organization, setOrganization] = useState({
         name: null,
         url: null,
     });
-    const [organizationName, setOrganizationName] = useState(
-        INITIAL_ORGANIZATION
-    );
+    
     const [errors, setErrors] = useState(null);
-    const [repo, setRepo] = useState(INITIAL_REPO);
+
+    const [orgQueryParams, setOrgQueryParams] = useState({
+        organizationName: INITIAL_ORGANIZATION,
+        repo: INITIAL_REPO,
+    });
 
     return {
-        path,
-        setPath,
         organization,
         setOrganization,
-        organizationName,
-        setOrganizationName,
         errors,
         setErrors,
-        repo,
-        setRepo,
+        orgQueryParams,
+        setOrgQueryParams,
     };
 };
+
+export { useAppState };

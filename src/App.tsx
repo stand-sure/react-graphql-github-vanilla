@@ -6,69 +6,54 @@ import React, {
 } from "react";
 import "./App.css";
 import { Organization } from "./Organization";
-import { getDataFromGithub } from "./organizationQuery";
+import { getDataFromGithub } from "./getOrganizationDataFromGithub";
 import { useAppState } from "./useAppState";
-
-type Maybe<T> = T | null | undefined;
 
 const TITLE = "React GraphQL Github Client";
 
-const App = function App() {
-    // const [path, setPath] = useState(DEFAULT_PATH);
-    // const [organization, setOrganization] = useState({
-    //     name: null,
-    //     url: null,
-    // });
-    // const [organizationName, setOrganizationName] = useState(
-    //     INITIAL_ORGANIZATION
-    // );
-    // const [errors, setErrors] = useState(null);
-    // const [repo, setRepo] = useState(INITIAL_REPO);
+type Maybe<T> = T | null | undefined;
 
+const App = function App() {
     const {
-        path,
-        setPath,
         organization,
         setOrganization,
-        organizationName,
-        setOrganizationName,
         errors,
         setErrors,
-        repo,
-        setRepo,
+        orgQueryParams,
+        setOrgQueryParams,
     } = useAppState();
 
-    const url = useRef(null);
+    const url = useRef<HTMLInputElement>(null);
 
     const fetchDataFromGithub = useCallback(
         () =>
-            getDataFromGithub({ organizationName, repo }).then((res) => {
+            getDataFromGithub({ ...orgQueryParams }).then((res) => {
                 setOrganization({ ...res.data.data.organization });
                 setErrors(res.data.errors);
             }),
-        [organizationName, repo, setOrganization, setErrors]
+        [orgQueryParams, setOrganization, setErrors]
     );
 
+    useEffect(() => {
+        fetchDataFromGithub();
+
+        return () => {
+            // TODO - is there anything to clean up?
+        };
+    }, [fetchDataFromGithub]);
+
     const onSubmit = (ev: FormEvent) => {
-        const newPath = ((url.current as any) as HTMLInputElement).value;
+        const newPath = url.current?.value ?? "";
         const [newName, newRepo] = newPath.split("/");
 
         if (!newName || !newRepo) {
             return;
         }
 
-        setPath(newPath);
-        setOrganizationName(newName);
-        setRepo(newRepo);
-
-        fetchDataFromGithub();
+        setOrgQueryParams({ organizationName: newName, repo: newRepo });
 
         ev.preventDefault();
     };
-
-    useEffect(() => {
-        fetchDataFromGithub();
-    }, [fetchDataFromGithub, path]);
 
     return (
         <div>
@@ -85,7 +70,7 @@ const App = function App() {
                     ref={url}
                     style={{ width: "300px" }}
                     placeholder="user/repo"
-                    defaultValue={path}
+                    defaultValue={`${orgQueryParams.organizationName}/${orgQueryParams.repo}`}
                 />
                 <button type="submit">Search</button>
             </form>
