@@ -1,40 +1,40 @@
-import React, { Suspense } from "react";
+import React from "react";
 import { Errors } from "../Errors";
 
 type Maybe<T> = T | null | undefined;
 type OrganizationProps = {
-    organization: Maybe<{ name: Maybe<string>; url: Maybe<string> }>;
-    errors?: Maybe<Array<{ message: string }>>;
+    organization: Maybe<{ name: string; url: string }>;
+    errors?: Array<{ message: string }>;
 };
 
 const Organization = function Organization({
     organization,
     errors,
 }: OrganizationProps) {
-    if (errors) {
+    if (errors?.length) {
         return (
             <div>
-                <p>
+                <div>
                     <Errors errors={errors} />
-                </p>
+                </div>
             </div>
         );
     }
 
-    if (organization && organization.url) {
-        return (
-            <Suspense fallback="Loading issues...">
-                <div>
-                    <p>
-                        <strong>Issues for Organization: </strong>
-                        <a href={organization?.url}>{organization?.name}</a>
-                    </p>
-                </div>
-            </Suspense>
-        );
-    } else {
-        return <></>;
-    }
+    return (
+        <div>
+            <div>
+                <strong>Issues for Organization: </strong>
+                <a
+                    href={organization?.url ?? ""}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    {organization?.name}
+                </a>
+            </div>
+        </div>
+    );
 };
 
 export { Organization };

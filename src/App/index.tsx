@@ -1,4 +1,4 @@
-import React, { useRef, FormEvent, Suspense, useEffect } from "react";
+import React, { useRef, FormEvent, useEffect, Suspense } from "react";
 import { Organization } from "../Organization";
 import { Repository } from "../Repository";
 import { getDataFromGithub } from "./getOrganizationDataFromGithub";
@@ -27,26 +27,25 @@ function ErrorFallback({
 
 const App = function App() {
     const {
-        errors,
-        organization,
-        orgQueryParams,
-        repository,
+        state,
         setGithubResponse,
-        setOrgQueryParams,
+        queryParameters,
+        setQueryParameters,
     } = useAppState();
 
     const url = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        getDataFromGithub({ ...orgQueryParams }).then((res) => {
+        getDataFromGithub({ ...queryParameters }).then((res) => {
             const data = { ...res.data };
             if (
-                data?.data?.organization?.name === organization?.name &&
-                data?.data?.organization?.repository?.name === repository?.name &&
-                repository?.issues?.edges?.length
+                data?.data?.organization?.name === state.organization?.name &&
+                data?.data?.organization?.repository?.name ===
+                    state.repository?.name &&
+                state.repository?.issues?.edges?.length
             ) {
                 data.data.organization.repository.issues.edges = [
-                    ...repository.issues.edges,
+                    ...state.repository.issues.edges,
                     ...data.data.organization.repository.issues.edges,
                 ];
             }
@@ -54,23 +53,29 @@ const App = function App() {
             setGithubResponse(data);
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [orgQueryParams]);
+    }, [queryParameters]);
 
     const onSubmit = (ev: FormEvent) => {
-        const newPath = url.current?.value ?? "";
+        const newPath = url.current?.value ?? " / ";
         const [newName, newRepo] = newPath.split("/");
 
         if (!newName || !newRepo) {
             return;
         }
 
-        setOrgQueryParams({ organizationName: newName, repo: newRepo });
+        setGithubResponse({ data: undefined, errors: undefined });
+
+        setQueryParameters({
+            organizationName: newName,
+            repo: newRepo,
+            cursor: undefined,
+        });
         ev.preventDefault();
     };
 
     const onFetchMoreIssues = function onFetchMoreIssues() {
-        const cursor = repository?.issues?.pageInfo?.endCursor;
-        setOrgQueryParams({ ...orgQueryParams, cursor });
+        const cursor = state.repository?.issues?.pageInfo?.endCursor;
+        setQueryParameters({ ...queryParameters, cursor });
     };
 
     return (
@@ -91,7 +96,7 @@ const App = function App() {
                     className="form-control mr-2 w-50"
                     ref={url}
                     placeholder="user/repo"
-                    defaultValue={`${orgQueryParams.organizationName}/${orgQueryParams.repo}`}
+                    defaultValue={`${queryParameters.organizationName}/${queryParameters.repo}`}
                 />
                 <button type="submit" className="btn btn-primary">
                     Search
@@ -101,17 +106,20 @@ const App = function App() {
             <ErrorBoundary
                 FallbackComponent={ErrorFallback}
                 onReset={() => {
-                    setOrgQueryParams({ organizationName: "", repo: "" });
+                    setQueryParameters({
+                        organizationName: "",
+                        repo: "",
+                    });
                 }}
             >
                 <Suspense fallback={<em>loading...</em>}>
                     <div className="mx-3">
                         <Organization
-                            organization={organization}
-                            errors={errors}
+                            organization={{ ...state.organization }}
+                            errors={state.errors ?? []}
                         />
                         <Repository
-                            repository={repository}
+                            repository={state.repository}
                             fetchMoreIssues={onFetchMoreIssues}
                         />
                     </div>

@@ -10,8 +10,8 @@ import { RepositoryShape } from "../Repository";
 type Maybe<T> = T | null | undefined;
 
 type OrganizationShape = {
-    name: Maybe<string>;
-    url: Maybe<string>;
+    name: string;
+    url: string;
     repository?: RepositoryShape;
 };
 
@@ -30,39 +30,52 @@ type GithubResponseShape = {
     errors?: Array<ErrorShape>;
 };
 
+type StateShape = {
+    organization: OrganizationShape;
+    errors: Maybe<Array<ErrorShape>>;
+    repository: RepositoryShape;
+};
+
 /**
  * sets up state hooks for org query and the response (either errors or GitHub organization fields (as set up in the query))
  */
 const useAppState = function useAppState() {
-    const [organization, setOrganization] = useState<Maybe<OrganizationShape>>(
-        null
-    );
-
-    const [errors, setErrors] = useState<Maybe<Array<ErrorShape>>>(null);
-
-    const [orgQueryParams, setOrgQueryParams] = useState<OrgQueryParamsShape>({
+    const [queryParameters, setQueryParameters] = useState<
+        OrgQueryParamsShape
+    >({
         organizationName: INITIAL_ORGANIZATION,
         repo: INITIAL_REPO,
     });
 
-    const [repository, setRepository] = useState<RepositoryShape>(null);
+    const [state, setState] = useState<StateShape>({
+        organization: {
+            name: "",
+            url: "",
+        },
+        errors: [],
+        repository: undefined,
+    });
 
     const setGithubResponse = function setGithubResponse({
         data,
         errors,
     }: GithubResponseShape) {
-        setErrors(errors ?? []);
-        setOrganization(data?.organization);
-        setRepository(data?.organization?.repository);
+        setState({
+            organization: {
+                name: data?.organization?.name ?? "",
+                url: data?.organization?.url ?? "",
+            },
+            errors: errors ?? [],
+            repository: data?.organization?.repository,
+        });
     };
 
     return {
-        errors,
-        organization,
-        orgQueryParams,
-        repository,
+        state,
+        setState,
+        queryParameters,
+        setQueryParameters,
         setGithubResponse,
-        setOrgQueryParams,
     };
 };
 

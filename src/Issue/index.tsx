@@ -15,7 +15,9 @@ type PropsShape = {
 const Issue = function Issue({ issue }: PropsShape) {
     return (
         <li>
-            <a href={issue.node.url}>{issue.node.title}</a>
+            <a href={issue.node.url} target="_blank" rel="noopener noreferrer">
+                {issue.node.title}
+            </a>
             <ReactionsList reactions={issue.node.reactions} />
         </li>
     );

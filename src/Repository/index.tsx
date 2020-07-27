@@ -25,7 +25,13 @@ const Repository = function Repository({
             <div>
                 <div>
                     <strong>In Repository:</strong>{" "}
-                    <a href={repository.url ?? ""}>{repository.name}</a>
+                    <a
+                        href={repository.url ?? ""}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        {repository.name}
+                    </a>
                 </div>
                 <IssueList
                     issues={repository.issues}
