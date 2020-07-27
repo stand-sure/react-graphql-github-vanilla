@@ -39,7 +39,19 @@ const App = function App() {
 
     useEffect(() => {
         getDataFromGithub({ ...orgQueryParams }).then((res) => {
-            setGithubResponse({ ...res.data });
+            const data = { ...res.data };
+            if (
+                data?.data?.organization?.name === organization?.name &&
+                data?.data?.organization?.repository?.name === repository?.name &&
+                repository?.issues?.edges?.length
+            ) {
+                data.data.organization.repository.issues.edges = [
+                    ...repository.issues.edges,
+                    ...data.data.organization.repository.issues.edges,
+                ];
+            }
+
+            setGithubResponse(data);
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [orgQueryParams]);

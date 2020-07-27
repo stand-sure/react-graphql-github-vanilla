@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import { Issue, IssuePropsShape } from "../Issue";
 
 type PropsShape = {
@@ -14,6 +14,12 @@ type PropsShape = {
 };
 
 const IssueList = function IssueList({ issues, fetchMoreIssues }: PropsShape) {
+    const bottom = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        bottom.current?.scrollIntoView();
+    }, [issues]);
+
     if (!issues?.edges?.length) {
         return <></>;
     }
@@ -30,6 +36,7 @@ const IssueList = function IssueList({ issues, fetchMoreIssues }: PropsShape) {
                     More
                 </button>
             )}
+            <div ref={bottom}>{}</div>
         </>
     );
 };

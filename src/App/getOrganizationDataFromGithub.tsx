@@ -18,13 +18,13 @@ const issuesQuery = `
     repository(name: $repository){
         name
         url
-        issues(first: 3, states: [OPEN], after: $cursor){
+        issues(first: 5, states: [OPEN], after: $cursor){
             edges {
                 node {
                     id
                     title
                     url
-                    reactions(last: 3) {
+                    reactions(last: 5) {
                         edges {
                             node {
                                 id
