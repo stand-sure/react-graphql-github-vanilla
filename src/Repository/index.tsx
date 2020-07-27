@@ -13,11 +13,13 @@ export type RepositoryShape = Maybe<
 
 type RepositoryPropsShape = {
     repository: RepositoryShape;
+    fetchMoreIssues?: () => void;
 };
 
-const fetchMoreIssues = function fetchMoreIssues() {};
-
-const Repository = function Repository({ repository }: RepositoryPropsShape) {
+const Repository = function Repository({
+    repository,
+    fetchMoreIssues,
+}: RepositoryPropsShape) {
     if (repository && repository.name) {
         return (
             <div>

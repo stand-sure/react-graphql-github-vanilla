@@ -25,7 +25,11 @@ const IssueList = function IssueList({ issues, fetchMoreIssues }: PropsShape) {
                     <Issue issue={issue} key={issue.node.id} />
                 ))}
             </ul>
-            {issues.pageInfo?.hasNextPage && <button className="btn btn-secondary">More</button>}
+            {issues.pageInfo?.hasNextPage && (
+                <button className="btn btn-secondary" onClick={fetchMoreIssues}>
+                    More
+                </button>
+            )}
         </>
     );
 };

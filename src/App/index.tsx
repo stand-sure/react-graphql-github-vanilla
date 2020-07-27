@@ -1,4 +1,4 @@
-import React, { useRef, FormEvent, Suspense } from "react";
+import React, { useRef, FormEvent, Suspense, useEffect } from "react";
 import { Organization } from "../Organization";
 import { Repository } from "../Repository";
 import { getDataFromGithub } from "./getOrganizationDataFromGithub";
@@ -28,7 +28,6 @@ function ErrorFallback({
 const App = function App() {
     const {
         errors,
-        issues,
         organization,
         orgQueryParams,
         repository,
@@ -37,6 +36,13 @@ const App = function App() {
     } = useAppState();
 
     const url = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        getDataFromGithub({ ...orgQueryParams }).then((res) => {
+            setGithubResponse({ ...res.data });
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [orgQueryParams]);
 
     const onSubmit = (ev: FormEvent) => {
         const newPath = url.current?.value ?? "";
@@ -47,10 +53,12 @@ const App = function App() {
         }
 
         setOrgQueryParams({ organizationName: newName, repo: newRepo });
-        getDataFromGithub({ ...orgQueryParams }).then((res) => {
-            setGithubResponse({ ...res.data });
-        });
         ev.preventDefault();
+    };
+
+    const onFetchMoreIssues = function onFetchMoreIssues() {
+        const cursor = repository?.issues?.pageInfo?.endCursor;
+        setOrgQueryParams({ ...orgQueryParams, cursor });
     };
 
     return (
@@ -78,16 +86,22 @@ const App = function App() {
                 </button>
             </form>
             <hr />
-            <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => {
-                setOrgQueryParams({ organizationName: "", repo: "" });
-            }} >
+            <ErrorBoundary
+                FallbackComponent={ErrorFallback}
+                onReset={() => {
+                    setOrgQueryParams({ organizationName: "", repo: "" });
+                }}
+            >
                 <Suspense fallback={<em>loading...</em>}>
                     <div className="mx-3">
                         <Organization
                             organization={organization}
                             errors={errors}
                         />
-                        <Repository repository={repository} />
+                        <Repository
+                            repository={repository}
+                            fetchMoreIssues={onFetchMoreIssues}
+                        />
                     </div>
                 </Suspense>
             </ErrorBoundary>

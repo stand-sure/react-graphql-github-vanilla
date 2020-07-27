@@ -6,7 +6,6 @@ import {
 } from "./getOrganizationDataFromGithub";
 
 import { RepositoryShape } from "../Repository";
-import { IssueListPropsShape } from "../IssueList";
 
 type Maybe<T> = T | null | undefined;
 
@@ -14,6 +13,12 @@ type OrganizationShape = {
     name: Maybe<string>;
     url: Maybe<string>;
     repository?: RepositoryShape;
+};
+
+type OrgQueryParamsShape = {
+    organizationName: string;
+    repo: string;
+    cursor?: string;
 };
 
 type ErrorShape = { message: string };
@@ -35,33 +40,24 @@ const useAppState = function useAppState() {
 
     const [errors, setErrors] = useState<Maybe<Array<ErrorShape>>>(null);
 
-    const [orgQueryParams, setOrgQueryParams] = useState({
+    const [orgQueryParams, setOrgQueryParams] = useState<OrgQueryParamsShape>({
         organizationName: INITIAL_ORGANIZATION,
         repo: INITIAL_REPO,
     });
 
     const [repository, setRepository] = useState<RepositoryShape>(null);
 
-    const [issues, setIssues] = useState<IssueListPropsShape["issues"]>({
-        edges: [],
-        pageInfo: {
-            hasNextPage: false,
-        },
-    });
-
     const setGithubResponse = function setGithubResponse({
         data,
         errors,
     }: GithubResponseShape) {
-        debugger;
         setErrors(errors ?? []);
-        setOrganization(data?.organization ?? { name: null, url: null });
-        setRepository(data?.organization?.repository ?? {});
+        setOrganization(data?.organization);
+        setRepository(data?.organization?.repository);
     };
 
     return {
         errors,
-        issues,
         organization,
         orgQueryParams,
         repository,

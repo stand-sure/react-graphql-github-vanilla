@@ -18,7 +18,7 @@ const issuesQuery = `
     repository(name: $repository){
         name
         url
-        issues(last: 3, states: [OPEN], after: $cursor){
+        issues(first: 3, states: [OPEN], after: $cursor){
             edges {
                 node {
                     id
