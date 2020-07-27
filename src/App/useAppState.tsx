@@ -29,19 +29,18 @@ type GithubResponseShape = {
  * sets up state hooks for org query and the response (either errors or GitHub organization fields (as set up in the query))
  */
 const useAppState = function useAppState() {
-    const [organization, setOrganization] = useState<OrganizationShape>({
-        name: "",
-        url: "",
-    });
+    const [organization, setOrganization] = useState<Maybe<OrganizationShape>>(
+        null
+    );
 
-    const [errors, setErrors] = useState<Array<ErrorShape>>([]);
+    const [errors, setErrors] = useState<Maybe<Array<ErrorShape>>>(null);
 
     const [orgQueryParams, setOrgQueryParams] = useState({
         organizationName: INITIAL_ORGANIZATION,
         repo: INITIAL_REPO,
     });
 
-    const [repository, setRepository] = useState<RepositoryShape>({});
+    const [repository, setRepository] = useState<RepositoryShape>(null);
 
     const [issues, setIssues] = useState<IssueListPropsShape["issues"]>({
         edges: [],

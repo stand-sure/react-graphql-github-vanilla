@@ -3,11 +3,27 @@ import { Organization } from "../Organization";
 import { Repository } from "../Repository";
 import { getDataFromGithub } from "../getOrganizationDataFromGithub";
 import { useAppState } from "./useAppState";
+import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 
 const TITLE = "React GraphQL Github Client";
+
+function ErrorFallback({
+    error,
+    componentStack,
+    resetErrorBoundary,
+}: FallbackProps) {
+    return (
+        <div role="alert">
+            <p>Something went wrong:</p>
+            <pre>{error?.message}</pre>
+            <pre>{componentStack}</pre>
+            <button onClick={resetErrorBoundary}>Try again</button>
+        </div>
+    );
+}
 
 const App = function App() {
     const {
@@ -62,12 +78,19 @@ const App = function App() {
                 </button>
             </form>
             <hr />
-            <Suspense fallback={<em>loading...</em>}>
-                <p className="mx-3">
-                    <Organization organization={organization} errors={errors} />
-                    <Repository repository={repository} />
-                </p>
-            </Suspense>
+            <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => {
+                setOrgQueryParams({ organizationName: "", repo: "" });
+            }} >
+                <Suspense fallback={<em>loading...</em>}>
+                    <p className="mx-3">
+                        <Organization
+                            organization={organization}
+                            errors={errors}
+                        />
+                        <Repository repository={repository} />
+                    </p>
+                </Suspense>
+            </ErrorBoundary>
         </div>
     );
 };

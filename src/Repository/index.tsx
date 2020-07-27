@@ -1,26 +1,21 @@
 import React from "react";
 
+import { IssueList, IssueListPropsShape } from "../IssueList";
+
 type Maybe<T> = T | null | undefined;
 
-type IssueShape = {
-    id: string;
-    title: string;
-    url: string;
-};
-
-type IssuesShape = {
-    edges: Array<{ node: IssueShape }>;
-};
-
-export type RepositoryShape = {
-    name?: Maybe<string>;
-    url?: Maybe<string>;
-    issues?: Maybe<IssuesShape>;
-};
+export type RepositoryShape = Maybe<
+    {
+        name?: Maybe<string>;
+        url?: Maybe<string>;
+    } & IssueListPropsShape
+>;
 
 type RepositoryPropsShape = {
     repository: RepositoryShape;
 };
+
+const fetchMoreIssues = function fetchMoreIssues() {};
 
 const Repository = function Repository({ repository }: RepositoryPropsShape) {
     if (repository && repository.name) {
@@ -30,13 +25,10 @@ const Repository = function Repository({ repository }: RepositoryPropsShape) {
                     <strong>In Repository:</strong>{" "}
                     <a href={repository.url ?? ""}>{repository.name}</a>
                 </p>
-                <ul>
-                    {repository.issues?.edges.map((issue) => (
-                        <li key={issue.node.id}>
-                            <a href={issue.node.url}>{issue.node.title}</a>
-                        </li>
-                    ))}
-                </ul>
+                <IssueList
+                    issues={repository.issues}
+                    fetchMoreIssues={fetchMoreIssues}
+                />
             </div>
         );
     } else {

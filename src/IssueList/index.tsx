@@ -2,7 +2,7 @@ import React from "react";
 import { Issue, IssuePropsShape } from "../Issue";
 
 type PropsShape = {
-    issues: {
+    issues?: {
         edges: Array<IssuePropsShape["issue"]>;
         totalCount?: number;
         pageInfo?: {
@@ -10,10 +10,10 @@ type PropsShape = {
             hasNextPage: boolean;
         };
     };
-    fetchMoreIssues: () => void;
+    fetchMoreIssues?: () => void;
 };
 
-const IssueList = function IssueList({ issues }: PropsShape) {
+const IssueList = function IssueList({ issues, fetchMoreIssues }: PropsShape) {
     if (!issues?.edges?.length) {
         return <></>;
     }

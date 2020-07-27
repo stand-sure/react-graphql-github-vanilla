@@ -8,12 +8,14 @@ type PropsShape = {
 };
 
 const ReactionsList = function ReactionsList({ reactions }: PropsShape) {
-    return (
+    return (reactions && reactions.edges?.length > 0) ? (
         <ul>
             {reactions.edges.map((reaction) => (
                 <ReactionItem reaction={reaction} key={reaction.node.id} />
             ))}
         </ul>
+    ) : (
+        <></>
     );
 };
 
