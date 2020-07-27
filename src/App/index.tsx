@@ -1,47 +1,26 @@
-import React, { useRef, FormEvent, useEffect, useCallback } from "react";
+import React, { useRef, FormEvent, Suspense } from "react";
 import { Organization } from "../Organization";
 import { Repository } from "../Repository";
 import { getDataFromGithub } from "../getOrganizationDataFromGithub";
-import { useAppState } from "../useAppState";
+import { useAppState } from "./useAppState";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 
 const TITLE = "React GraphQL Github Client";
 
-type Maybe<T> = T | null | undefined;
-
 const App = function App() {
     const {
-        organization,
-        setOrganization,
         errors,
-        setErrors,
+        issues,
+        organization,
         orgQueryParams,
-        setOrgQueryParams,
         repository,
-        setRepository,
+        setGithubResponse,
+        setOrgQueryParams,
     } = useAppState();
 
     const url = useRef<HTMLInputElement>(null);
-
-    const fetchDataFromGithub = useCallback(
-        () =>
-            getDataFromGithub({ ...orgQueryParams }).then((res) => {
-                setOrganization({ ...res.data.data.organization });
-                setErrors(res.data.errors);
-                setRepository(res.data.data.organization?.repository);
-            }),
-        [orgQueryParams, setOrganization, setErrors, setRepository]
-    );
-
-    useEffect(() => {
-        fetchDataFromGithub();
-
-        return () => {
-            // TODO - is there anything to clean up?
-        };
-    }, [fetchDataFromGithub]);
 
     const onSubmit = (ev: FormEvent) => {
         const newPath = url.current?.value ?? "";
@@ -52,7 +31,9 @@ const App = function App() {
         }
 
         setOrgQueryParams({ organizationName: newName, repo: newRepo });
-
+        getDataFromGithub({ ...orgQueryParams }).then((res) => {
+            setGithubResponse({ ...res.data });
+        });
         ev.preventDefault();
     };
 
@@ -76,13 +57,17 @@ const App = function App() {
                     placeholder="user/repo"
                     defaultValue={`${orgQueryParams.organizationName}/${orgQueryParams.repo}`}
                 />
-                <button type="submit" className="btn btn-primary">Search</button>
+                <button type="submit" className="btn btn-primary">
+                    Search
+                </button>
             </form>
             <hr />
-            <p className="mx-3">
-                <Organization organization={organization} errors={errors} />
-                <Repository repository={repository} />
-            </p>
+            <Suspense fallback={<em>loading...</em>}>
+                <p className="mx-3">
+                    <Organization organization={organization} errors={errors} />
+                    <Repository repository={repository} />
+                </p>
+            </Suspense>
         </div>
     );
 };

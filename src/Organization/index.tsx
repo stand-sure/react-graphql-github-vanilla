@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { Errors } from "../Errors";
 
 type Maybe<T> = T | null | undefined;
@@ -23,12 +23,14 @@ const Organization = function Organization({
 
     if (organization && organization.url) {
         return (
-            <div>
-                <p>
-                    <strong>Issues for Organization: </strong>
-                    <a href={organization?.url}>{organization?.name}</a>
-                </p>
-            </div>
+            <Suspense fallback="Loading issues...">
+                <div>
+                    <p>
+                        <strong>Issues for Organization: </strong>
+                        <a href={organization?.url}>{organization?.name}</a>
+                    </p>
+                </div>
+            </Suspense>
         );
     } else {
         return <></>;

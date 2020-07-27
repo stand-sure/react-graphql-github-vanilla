@@ -23,7 +23,7 @@ type RepositoryPropsShape = {
 };
 
 const Repository = function Repository({ repository }: RepositoryPropsShape) {
-    if (repository) {
+    if (repository && repository.name) {
         return (
             <div>
                 <p>
