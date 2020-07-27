@@ -1,7 +1,7 @@
 import React, { useRef, FormEvent, Suspense } from "react";
 import { Organization } from "../Organization";
 import { Repository } from "../Repository";
-import { getDataFromGithub } from "../getOrganizationDataFromGithub";
+import { getDataFromGithub } from "./getOrganizationDataFromGithub";
 import { useAppState } from "./useAppState";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 
@@ -82,13 +82,13 @@ const App = function App() {
                 setOrgQueryParams({ organizationName: "", repo: "" });
             }} >
                 <Suspense fallback={<em>loading...</em>}>
-                    <p className="mx-3">
+                    <div className="mx-3">
                         <Organization
                             organization={organization}
                             errors={errors}
                         />
                         <Repository repository={repository} />
-                    </p>
+                    </div>
                 </Suspense>
             </ErrorBoundary>
         </div>

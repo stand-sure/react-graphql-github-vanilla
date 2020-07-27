@@ -21,10 +21,10 @@ const Repository = function Repository({ repository }: RepositoryPropsShape) {
     if (repository && repository.name) {
         return (
             <div>
-                <p>
+                <div>
                     <strong>In Repository:</strong>{" "}
                     <a href={repository.url ?? ""}>{repository.name}</a>
-                </p>
+                </div>
                 <IssueList
                     issues={repository.issues}
                     fetchMoreIssues={fetchMoreIssues}
