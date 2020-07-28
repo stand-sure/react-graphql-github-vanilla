@@ -16,8 +16,10 @@ const issuesQuery = `
     name
     url
     repository(name: $repository){
+        id
         name
         url
+        viewerHasStarred
         issues(first: 5, states: [OPEN], after: $cursor){
             edges {
                 node {
@@ -73,4 +75,57 @@ const getDataFromGithub = function getData({
     });
 };
 
-export { DEFAULT_PATH, INITIAL_ORGANIZATION, INITIAL_REPO, getDataFromGithub };
+const addStarQuery = `
+    mutation ($repositoryId: ID!) {
+        addStar(input: {starrableId: $repositoryId}) {
+            starrable {
+                viewerHasStarred
+            }
+        }
+    }`;
+
+const removeStarQuery = `
+    mutation ($repositoryId: ID!) {
+        removeStar(input: {starrableId: $repositoryId}) {
+            starrable {
+                viewerHasStarred
+            }
+        }
+    }`;
+
+type StarrableShape = {
+    starrable: { viewerHasStarred: boolean };
+};
+
+const toggleStar = function toggleStar({
+    id,
+    previouslyStarred,
+}: {
+    id: string;
+    previouslyStarred: boolean;
+}) {
+    return axiosGithubGraphQL
+        .post("", {
+            query: previouslyStarred ? removeStarQuery : addStarQuery,
+            variables: {
+                repositoryId: id,
+            },
+        })
+        .then((res) => {
+            const data: {
+                addStar?: StarrableShape;
+                removeStar?: StarrableShape;
+            } = res.data?.data;
+            const viewerHasStarred = (data.addStar ?? data.removeStar)
+                ?.starrable?.viewerHasStarred;
+            return Promise.resolve(viewerHasStarred);
+        });
+};
+
+export {
+    DEFAULT_PATH,
+    INITIAL_ORGANIZATION,
+    INITIAL_REPO,
+    getDataFromGithub,
+    toggleStar,
+};

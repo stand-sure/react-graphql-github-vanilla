@@ -1,7 +1,7 @@
 import React, { useRef, FormEvent, useEffect, Suspense } from "react";
 import { Organization } from "../Organization";
 import { Repository } from "../Repository";
-import { getDataFromGithub } from "./getOrganizationDataFromGithub";
+import { getDataFromGithub, toggleStar } from "./getOrganizationDataFromGithub";
 import { useAppState } from "./useAppState";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 
@@ -31,6 +31,7 @@ const App = function App() {
         setGithubResponse,
         queryParameters,
         setQueryParameters,
+        updateRepositoryStarStatus,
     } = useAppState();
 
     const defaultOrganizationName = queryParameters.organizationName;
@@ -82,6 +83,16 @@ const App = function App() {
         setQueryParameters({ ...queryParameters, cursor });
     };
 
+    const onToggleStar = function onToggleStar() {
+        const id = String(state.repository?.id);
+        const previouslyStarred = Boolean(state.repository?.viewerHasStarred);
+        toggleStar({ id, previouslyStarred }).then((starred?: boolean) => {
+            if (starred !== undefined) {
+                updateRepositoryStarStatus(starred);
+            }
+        });
+    };
+
     return (
         <div className="p-1">
             <header
@@ -125,6 +136,7 @@ const App = function App() {
                         <Repository
                             repository={state.repository}
                             fetchMoreIssues={onFetchMoreIssues}
+                            toggleStar={onToggleStar}
                         />
                     </div>
                 </ErrorBoundary>

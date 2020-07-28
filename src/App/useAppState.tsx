@@ -40,12 +40,12 @@ type StateShape = {
  * sets up state hooks for org query and the response (either errors or GitHub organization fields (as set up in the query))
  */
 const useAppState = function useAppState() {
-    const [queryParameters, setQueryParameters] = useState<
-        OrgQueryParamsShape
-    >({
-        organizationName: INITIAL_ORGANIZATION,
-        repo: INITIAL_REPO,
-    });
+    const [queryParameters, setQueryParameters] = useState<OrgQueryParamsShape>(
+        {
+            organizationName: INITIAL_ORGANIZATION,
+            repo: INITIAL_REPO,
+        }
+    );
 
     const [state, setState] = useState<StateShape>({
         organization: {
@@ -70,12 +70,25 @@ const useAppState = function useAppState() {
         });
     };
 
+    const updateRepositoryStarStatus = function updateRepositoryStarStatus(
+        starred: boolean
+    ) {
+        setState({
+            ...state,
+            repository: {
+                ...state.repository,
+                viewerHasStarred: starred
+            }
+        })
+    };
+
     return {
         state,
         setState,
         queryParameters,
         setQueryParameters,
         setGithubResponse,
+        updateRepositoryStarStatus,
     };
 };
 
