@@ -33,6 +33,9 @@ const App = function App() {
         setQueryParameters,
     } = useAppState();
 
+    const defaultOrganizationName = queryParameters.organizationName;
+    const defaultRepoName = queryParameters.repo;
+
     const url = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -56,6 +59,10 @@ const App = function App() {
     }, [queryParameters]);
 
     const onSubmit = (ev: FormEvent) => {
+        ev.preventDefault();
+
+        setGithubResponse({ data: undefined, errors: undefined });
+
         const newPath = url.current?.value ?? " / ";
         const [newName, newRepo] = newPath.split("/");
 
@@ -63,14 +70,11 @@ const App = function App() {
             return;
         }
 
-        setGithubResponse({ data: undefined, errors: undefined });
-
         setQueryParameters({
             organizationName: newName,
             repo: newRepo,
             cursor: undefined,
         });
-        ev.preventDefault();
     };
 
     const onFetchMoreIssues = function onFetchMoreIssues() {
@@ -96,23 +100,23 @@ const App = function App() {
                     className="form-control mr-2 w-50"
                     ref={url}
                     placeholder="user/repo"
-                    defaultValue={`${queryParameters.organizationName}/${queryParameters.repo}`}
+                    defaultValue={`${defaultOrganizationName}/${defaultRepoName}`}
                 />
                 <button type="submit" className="btn btn-primary">
                     Search
                 </button>
             </form>
             <hr />
-            <ErrorBoundary
-                FallbackComponent={ErrorFallback}
-                onReset={() => {
-                    setQueryParameters({
-                        organizationName: "",
-                        repo: "",
-                    });
-                }}
-            >
-                <Suspense fallback={<em>loading...</em>}>
+            <Suspense fallback={<em>loading...</em>}>
+                <ErrorBoundary
+                    FallbackComponent={ErrorFallback}
+                    onReset={() => {
+                        setQueryParameters({
+                            organizationName: "",
+                            repo: "",
+                        });
+                    }}
+                >
                     <div className="mx-3">
                         <Organization
                             organization={{ ...state.organization }}
@@ -123,8 +127,8 @@ const App = function App() {
                             fetchMoreIssues={onFetchMoreIssues}
                         />
                     </div>
-                </Suspense>
-            </ErrorBoundary>
+                </ErrorBoundary>
+            </Suspense>
         </div>
     );
 };
